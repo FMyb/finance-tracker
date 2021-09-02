@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="create-user" author="yar">
+        <createTable tableName="users">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+        <createSequence sequenceName="user_seq" startValue="100" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="create-account" author="yar">
+        <createTable tableName="accounts">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="accounts_users_fk"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="balance" type="decimal()"/>
+        </createTable>
+        <createSequence sequenceName="account_seq" startValue="100" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="create-category" author="yar">
+        <createTable tableName="categories">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="categories_users_fk"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>  <!-- Check! -->
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-operation" author="yar">
+        <createTable tableName="operations">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="bigint">
+                <constraints foreignKeyName="operations_accounts_fk"
+                             referencedTableName="accounts"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="amount" type="decimal"/>
+            <column name="category_id" type="bigint">
+                <constraints foreignKeyName="accounts_categories_fk"
+                             referencedTableName="categories"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="date" type="datetime"/>
+        </createTable>
+        <createSequence sequenceName="operation_seq" startValue="100" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="create-category-seq" author="yar">
+        <createSequence sequenceName="category_seq" startValue="100" incrementBy="1"/>
+    </changeSet>
+    
+    <changeSet id="create-user-create-index" author="yar">
+        <createIndex tableName="users" indexName="user_id_index" unique="true">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create_mapping_account_to_user" author="yar">
+        <createTable tableName="user_to_account">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="mapping_account_to_user_user_id_fk"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="account_id" type="bigint">
+                <constraints foreignKeyName="mapping_account_to_user_account_id_fk"
+                             referencedTableName="accounts"
+                             referencedColumnNames="id"/>
+            </column>
+            <column name="role" type="varchar(255)"/>
+        </createTable>
+        <createSequence sequenceName="user_to_account_seq" startValue="100" incrementBy="1"/>
+        <createIndex tableName="user_to_account" indexName="user_account_ids_index" unique="true">
+            <column name="user_id"/>
+            <column name="account_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-telegram-user" author="nata">
+        <createTable tableName="telegram_users">
+            <column name="telegram_user_id" type="varchar(11)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="state" type="varchar(255)"/>
+            <column name="current_account_id" type="bigint">
+                <constraints foreignKeyName="telegram_users_accounts_fk"
+                             referencedTableName="accounts"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-user-in-operation" author="yar">
+        <addColumn tableName="operations">
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="operations_users_fk"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-chat-id-and-name" author="nata">
+        <addColumn tableName="telegram_users">
+            <column name="chat_id" type="bigint"/>
+            <column name="telegram_user_name" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
